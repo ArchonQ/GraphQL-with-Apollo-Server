@@ -1,16 +1,15 @@
-import DataLoader from 'dataloader';
 import 'dotenv/config';
 import cors from 'cors';
-import uuidv4 from 'uuid/v4';
-import express from 'express';
-import jwt from 'jsonwebtoken';
-import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 import http from 'http';
+import jwt from 'jsonwebtoken';
+import DataLoader from 'dataloader';
+import express from 'express';
+import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 
-import loaders from './loaders';
 import schema from './schema';
 import resolvers from './resolvers';
 import models, { sequelize } from './models';
+import loaders from './loaders';
 
 const app = express();
 
@@ -28,19 +27,6 @@ const getMe = async (req) => {
 	}
 };
 
-const batchUsers = async (keys, models) => {
-	const users = await models.User.findAll({
-		where: {
-			id: {
-				$in: keys,
-			},
-		},
-	});
-
-	return keys.map((key) => users.find((user) => user.id === key));
-};
-const userLoader = new DataLoader((keys) => batchUsers(keys, models));
-
 const server = new ApolloServer({
 	typeDefs: schema,
 	resolvers,
@@ -56,7 +42,6 @@ const server = new ApolloServer({
 			message,
 		};
 	},
-
 	context: async ({ req, connection }) => {
 		if (connection) {
 			return {
@@ -68,7 +53,7 @@ const server = new ApolloServer({
 		}
 
 		if (req) {
-			const me = await Me(req);
+			const me = await getMe(req);
 
 			return {
 				models,
