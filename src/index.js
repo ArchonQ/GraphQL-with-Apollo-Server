@@ -30,6 +30,8 @@ const getMe = async (req) => {
 const server = new ApolloServer({
 	typeDefs: schema,
 	resolvers,
+	introspection: true,
+	playground: true,
 	formatError: (error) => {
 		// remove the internal sequelize error message
 		// leave only the important validation error
